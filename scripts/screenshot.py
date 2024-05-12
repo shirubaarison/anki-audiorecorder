@@ -1,22 +1,12 @@
-import pyautogui
 from PIL import ImageGrab
+import pywinctl as pwc
 
 def screenshot():
-    # TODO: Screenshot only the focus window
+    window = pwc.getActiveWindow()
+
+    left, top, width, height = window.left, window.top, window.width, window.height
     
-    x, y = pyautogui.size()
-    x /= 2
-    y /= 2
-
-    screenshot = ImageGrab.grab()
-
-    region_size = 500
-    left = max(0, x - region_size)
-    top = max(0, y - region_size)
-    right = min(x + region_size, 1920)
-    bottom = min(y + region_size, 1080)
-
-    screenshot = ImageGrab.grab(bbox=(left, top, right, bottom))
+    screenshot = ImageGrab.grab(bbox=(left, top, left + width, top + height))
 
     screenshot.save('screenshot.jpg')
 
