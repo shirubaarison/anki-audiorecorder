@@ -22,6 +22,8 @@ def record_audio():
     global frames
     global CHANNELS
     
+    screenshot()
+
     stream = p.open(format=SAMPLE_FORMAT,
                     channels=CHANNELS,
                     rate=RATE,
@@ -29,7 +31,7 @@ def record_audio():
                     input=True)
 
     print('recording...')
-    print('press shift to stop recording')
+    print('press right shift to stop recording')
     is_recording = True
 
     while is_recording:
@@ -38,8 +40,6 @@ def record_audio():
 
     stream.stop_stream()
     stream.close()
-
-    screenshot()
 
     print('Finished recording!')
     print('\007')
@@ -70,9 +70,8 @@ def save_file():
 def connect():
     note_id = get_last_note()
     
-    # TODO: Generate good outputs titles...
     audio = './output.ogg'
-    picture = './screenshot.jpg'
+    picture = './screenshot.webp'
 
     add_audio_and_picture(note_id, audio, picture)
 
@@ -80,9 +79,9 @@ def connect():
 def on_press(key):
     global p
     
-    if key == keyboard.Key.shift_l and not is_recording:
+    if key == keyboard.Key.shift_r and not is_recording:
         threading.Thread(target=record_audio, daemon=True).start()
-    elif key == keyboard.Key.shift_l and is_recording:
+    elif key == keyboard.Key.shift_r and is_recording:
         stop_recording()
         save_file()
         connect()
@@ -113,7 +112,7 @@ def setup():
 if __name__ == '__main__':
     setup()
     print()
-    print('Press shift to start recording')
+    print('Press RIGHT shift to start recording')
     with keyboard.Listener(on_press=on_press) as listener:
         listener.join()
     print('\nBye')

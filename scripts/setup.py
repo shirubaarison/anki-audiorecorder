@@ -1,4 +1,5 @@
 import subprocess
+import sys
 
 '''
 sorry i think this only works if you use pipewire-pulse
@@ -15,15 +16,18 @@ def create_virtual_sink(sink_name):
         # Set default source to monitor of built-in analog audio
         subprocess.run(["pactl", "set-default-source", "alsa_input.pci-0000_00_1f.3.analog-stereo.monitor"], check=True)
         print(f"Virtual sink '{sink_name}' created successfully")
+        print('Run the application again to work.')
+        sys.exit()
     except subprocess.CalledProcessError as e:
         print(f"Error creating virtual sink: {e}")
 
 
 def verify_virtual_sink(sink_name):
+    print('Checking if virtual sink exists...')
     try:
         output = subprocess.run(["pactl", "list", "sinks"], capture_output=True, text=True, check=True)
         if sink_name in output.stdout:
-            print(f"Virtual sink '{sink_name}' already exists.")
+            print(f"Virtual sink '{sink_name}' exists.")
             return True
         else:
             print(f"Virtual sink '{sink_name}' not found.")

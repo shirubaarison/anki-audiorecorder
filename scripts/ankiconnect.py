@@ -1,7 +1,7 @@
 import requests
 import base64
 
-ANKICONNECT_URL = 'http://localhost:8765'
+from scripts.constants import ANKICONNECT_URL, AUDIO_FIELD, IMAGE_FIELD
 
 def browse(id = 1):
     payload = {
@@ -57,14 +57,14 @@ def add_audio_and_picture(note_id, audio_path, screenshot_path):
                     "filename": "output.ogg",
                     "data": encoded_audio.decode(),
                     "fields": [
-                        "SentenceAudio"
+                        AUDIO_FIELD
                     ]
                 }],
                 "picture": [{
                     "filename": "screenshot.jpg",
                     "data": encoded_img.decode(),
                     "fields": [
-                        "Picture"
+                        IMAGE_FIELD
                     ]
                 }]
             }   
