@@ -1,0 +1,8 @@
+import pyaudio
+
+CHUNK = 1024
+SAMPLE_FORMAT = pyaudio.paInt16
+FS = 44100
+RATE = 44100
+CHANNELS = 2
+VIRTUALSINK = 'vsink'
