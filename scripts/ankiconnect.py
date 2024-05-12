@@ -1,5 +1,4 @@
 import requests
-import json
 import base64
 
 ANKICONNECT_URL = 'http://localhost:8765'
@@ -46,7 +45,6 @@ def add_audio_and_picture(note_id, audio_path, screenshot_path):
     # https://github.com/FooSoft/anki-connect/issues/82
     browse()
 
-
     # TODO fields name can change depending on the user...
     payload = {
         "action": "updateNoteFields",
@@ -81,9 +79,18 @@ def add_audio_and_picture(note_id, audio_path, screenshot_path):
     return response_data
 
 
-note_id = get_last_note()
-audio = './output.ogg'
-picture = './screenshot.jpg'
-
-response = add_audio_and_picture(note_id, audio, picture)
-print(response)
+def check_connection():
+    try:
+        response = requests.get(ANKICONNECT_URL)
+        if response.status_code == 200:
+            print('Connected to Ankiconnect')
+            return True
+        else:
+            print(f'Unexpected status code: {response.status_code}')
+            return False
+    except requests.ConnectionError:
+        print('Ankiconnect is not running or port is not 8765.\nPlease open Anki or change AnkiConnect port')
+        return False
+    except requests.RequestException as e:
+        print(f'Error connecting to Ankiconnect: {e}')
+        return False

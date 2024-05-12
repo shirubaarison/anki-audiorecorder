@@ -1,3 +1,5 @@
 venv
 output.wav
 *.ogg
+screenshot.jpg
+__pycache__

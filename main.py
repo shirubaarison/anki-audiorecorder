@@ -7,18 +7,12 @@ import threading
 from pynput import keyboard
 from pydub import AudioSegment
 
-CHUNK = 8192
-SAMPLE_FORMAT = pyaudio.paInt16
-FS = 44100
-filename = 'output.wav'
+from scripts.constants import CHUNK, SAMPLE_FORMAT, FS, RATE, CHANNELS, VIRTUALSINK
+from scripts.ankiconnect import add_audio_and_picture, get_last_note, check_connection
+from scripts.setup import verify_virtual_sink, create_virtual_sink
+from scripts.screenshot import screenshot
 
 p = pyaudio.PyAudio()
-
-# TODO select device id automatically
-device_id = 0
-device_info = p.get_device_info_by_index(device_id)
-CHANNELS = device_info["maxInputChannels"] if (device_info["maxOutputChannels"] < device_info["maxInputChannels"]) else device_info["maxOutputChannels"]
-SAMPLE_RATE = int(device_info["defaultSampleRate"])
 
 is_recording = False
 frames = []
@@ -26,61 +20,100 @@ frames = []
 def record_audio():
     global is_recording
     global frames
-    global device_info
     global CHANNELS
-
+    
     stream = p.open(format=SAMPLE_FORMAT,
                     channels=CHANNELS,
-                    rate=SAMPLE_RATE,
+                    rate=RATE,
                     frames_per_buffer=CHUNK,
-                    input=True,
-                    input_device_index=device_info["index"],
-                    )
+                    input=True)
 
     print('recording...')
+    print('press shift to stop recording')
     is_recording = True
 
     while is_recording:
-        data = stream.read(CHUNK, exception_on_overflow=False)
+        data = stream.read(CHUNK, exception_on_overflow=False) # so many overflows that i had to disable exception
         frames.append(data)
 
     stream.stop_stream()
     stream.close()
 
-    print('Finished recording!', end=' ')
+    screenshot()
+
+    print('Finished recording!')
+    print('\007')
 
 
 def stop_recording():
     global is_recording
+    
     is_recording = False
 
 
 def save_file():    
-    with wave.open(filename, 'wb') as wf:
+    # pyAudio only works with .wav files, so I have to convert to .ogg afterwards
+    with wave.open('output.wav', 'wb') as wf:
         wf.setnchannels(CHANNELS)
         wf.setsampwidth(p.get_sample_size(SAMPLE_FORMAT))
         wf.setframerate(FS)
         wf.writeframes(b''.join(frames))
         wf.close()
 
-    audio_data = AudioSegment.from_wav(filename)
+    audio_data = AudioSegment.from_wav('output.wav')
     audio_data.export('output.ogg', format='ogg')
 
     os.remove('output.wav')
-    print('and converted to .ogg :)')
+    print('output.ogg created')
+
+
+def connect():
+    note_id = get_last_note()
+    
+    # TODO: Generate good outputs titles...
+    audio = './output.ogg'
+    picture = './screenshot.jpg'
+
+    add_audio_and_picture(note_id, audio, picture)
 
 
 def on_press(key):
     global p
-    if key == keyboard.Key.ctrl_l and not is_recording:
-        threading.Thread(target=record_audio).start()
-    elif key == keyboard.Key.ctrl_l and is_recording:
+    
+    if key == keyboard.Key.shift_l and not is_recording:
+        threading.Thread(target=record_audio, daemon=True).start()
+    elif key == keyboard.Key.shift_l and is_recording:
         stop_recording()
         save_file()
+        connect()
     elif key == keyboard.Key.esc and not is_recording:
         p.terminate()
-        sys.exit(0)
+        return False
 
 
-with keyboard.Listener(on_press=on_press) as listener:
-    listener.join()
+def setup():
+    global p
+    
+    # clear screen after PyAudio initialization
+    os.system('clear')
+    print('PyAudio initialized')
+
+    if not verify_virtual_sink(VIRTUALSINK):
+        print("Create virtual sink? (Y/n)", end=" ")
+        answer = str(input())
+        if answer == 'N' or answer == 'n' or answer == 'no':
+            return
+        create_virtual_sink(VIRTUALSINK)
+    
+    if not check_connection():
+        p.terminate()
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    setup()
+    print()
+    print('Press shift to start recording')
+    with keyboard.Listener(on_press=on_press) as listener:
+        listener.join()
+    print('\nBye')
