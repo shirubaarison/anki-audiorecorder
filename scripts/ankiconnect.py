@@ -1,7 +1,7 @@
 import requests
 import base64
 
-from scripts.constants import ANKICONNECT_URL, AUDIO_FIELD, IMAGE_FIELD
+from scripts.settings import ANKICONNECT_URL, AUDIO_FIELD, IMAGE_FIELD
 
 def browse(id = 1):
     payload = {

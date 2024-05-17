@@ -1,0 +1,6 @@
+Pillow==10.3.0
+pyaudio==0.2.14
+pydub==0.25.1
+pynput==1.7.7
+pywinctl==0.4
+Requests==2.31.0

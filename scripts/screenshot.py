@@ -1,7 +1,7 @@
 from PIL import Image, ImageGrab
 import pywinctl as pwc
 
-from scripts.constants import HEIGHT
+from scripts.settings import HEIGHT
 
 def resize_keep_aspect_ratio(image, new_height):
     width, height = image.size

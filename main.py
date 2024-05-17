@@ -7,7 +7,7 @@ import threading
 from pynput import keyboard
 from pydub import AudioSegment
 
-from scripts.constants import CHUNK, SAMPLE_FORMAT, FS, RATE, CHANNELS, VIRTUALSINK
+from scripts.settings import CHUNK, SAMPLE_FORMAT, FS, RATE, CHANNELS, VIRTUALSINK
 from scripts.ankiconnect import add_audio_and_picture, get_last_note, check_connection
 from scripts.setup import verify_virtual_sink, create_virtual_sink
 from scripts.screenshot import screenshot
